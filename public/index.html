@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Management System - Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>🎉 Event Management System</h1>
+                    <p>Admin Dashboard</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="margin-bottom: 10px;">Welcome, <strong id="adminName">Admin</strong>!</p>
+                    <button onclick="logout()" class="btn btn-danger" style="background: #e74c3c;">🚪 Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-card">
+                <h3>Total Events</h3>
+                <p id="totalEvents">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Attendees</h3>
+                <p id="totalAttendees">0</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+            <button class="btn btn-primary" onclick="showAddEventModal()">➕ Add Event</button>
+            <button class="btn btn-danger" onclick="showDeleteEventModal()">🗑️ Delete Event</button>
+            <button class="btn btn-success" onclick="showAddAttendeeModal()">👤 Add Attendee</button>
+            <button class="btn btn-warning" onclick="showDeleteAttendeeModal()">❌ Delete Attendee</button>
+            <button class="btn btn-info" onclick="refreshData()">🔄 Refresh</button>
+        </div>
+
+        <!-- Events Table -->
+        <div class="section">
+            <h2>📅 Events</h2>
+            <div class="table-container">
+                <table id="eventsTable">
+                    <thead>
+                        <tr><th>ID</th><th>Title</th><th>Date</th><th>Location</th><th>Organizer</th><th>Attendees</th></tr>
+                    </thead>
+                    <tbody id="eventsTableBody">
+                        <tr><td colspan="6" class="loading">Loading events...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Attendees Table -->
+        <div class="section">
+            <h2>👥 Attendees</h2>
+            <div class="table-container">
+                <table id="attendeesTable">
+                    <thead>
+                        <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Event ID</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="attendeesTableBody">
+                        <tr><td colspan="6" class="loading">Loading attendees...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addEventModal')">&times;</span>
+            <h2>Add New Event</h2>
+            <form id="addEventForm">
+                <input type="text" id="eventTitle" placeholder="Event Title" required>
+                <input type="date" id="eventDate" required>
+                <input type="text" id="eventLocation" placeholder="Location" required>
+                <input type="text" id="eventOrganizer" placeholder="Organizer" required>
+                <button type="submit" class="btn btn-primary">Add Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Attendee Modal -->
+    <div id="addAttendeeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addAttendeeModal')">&times;</span>
+            <h2>Add New Attendee</h2>
+            <form id="addAttendeeForm">
+                <input type="text" id="attendeeName" placeholder="Full Name" required>
+                <input type="email" id="attendeeEmail" placeholder="Email" required>
+                <input type="tel" id="attendeePhone" placeholder="Phone Number" required>
+                <select id="attendeeEventId" required>
+                    <option value="">Select Event</option>
+                </select>
+                <button type="submit" class="btn btn-success">Add Attendee</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Check if user is logged in on page load
+        async function checkSession() {
+            try {
+                const response = await fetch('/api/check-session');
+                const data = await response.json();
+                
+                if (!data.loggedIn) {
+                    // Not logged in - redirect to login page
+                    window.location.href = '/login.html';
+                } else {
+                    // Update welcome message with username
+                    document.getElementById('adminName').textContent = data.user.username;
+                }
+            } catch (error) {
+                console.error('Session check failed:', error);
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Run session check when page loads
+        checkSession();
+    </script>
+</body>
+</html>
